@@ -14,7 +14,7 @@ import javax.annotation.Resource;
  */
 @Configuration
 @EnableAuthorizationServer
-public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
+public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
     @Resource
     private PasswordEncoder encoder;
 

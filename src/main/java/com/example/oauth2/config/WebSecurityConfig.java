@@ -13,7 +13,7 @@ import javax.annotation.Resource;
  */
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Resource
     private PasswordEncoder encoder;
 
