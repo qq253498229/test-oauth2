@@ -25,11 +25,12 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
                 .redirectUris("http://www.baidu.com")
                 .authorizedGrantTypes("authorization_code", "refresh_token")
                 .scopes("app")
+                .autoApprove("app")
         ;
     }
 
     @Override
-    public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
+    public void configure(AuthorizationServerSecurityConfigurer security) {
         security.checkTokenAccess("isAuthenticated()");
     }
 }
