@@ -10,6 +10,8 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import javax.annotation.Resource;
 
 /**
+ * 授权服务器配置
+ *
  * @author wangbin
  */
 @Configuration
@@ -18,6 +20,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Resource
     private PasswordEncoder encoder;
 
+    /**
+     * 配置客户端信息（client）
+     */
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         clients.inMemory()
@@ -29,6 +34,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         ;
     }
 
+    /**
+     * 认证服务器安全配置
+     */
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) {
         security.checkTokenAccess("isAuthenticated()");

@@ -9,6 +9,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import javax.annotation.Resource;
 
 /**
+ * web安全配置
+ *
  * @author wangbin
  */
 @Configuration
@@ -17,6 +19,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Resource
     private PasswordEncoder encoder;
 
+    /**
+     * 授权管理配置（用户）
+     */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication()
