@@ -18,7 +18,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 
@@ -41,7 +40,25 @@ public class TokenTest {
      */
     @Test
     public void testGetToken() throws Exception {
-        // 登录后获取code
+        // 获取code
+        String code = getCode();
+        // 通过code获取token
+        Map map = getToken(code);
+        String token = (String) map.get("access_token");
+        // 校验token是否正确
+        checkToken(token);
+        // 刷新token
+        String refreshToken = (String) map.get("refresh_token");
+        Map refresh = refreshToken(refreshToken);
+        String token1 = (String) refresh.get("access_token");
+        // 校验刷新之后的token是否正确
+        checkToken(token1);
+    }
+
+    /**
+     * 获取code
+     */
+    private String getCode() throws Exception {
         MvcResult result = mockMvc.perform(post("/oauth/authorize")
                 .param("client_id", CLIENT)
                 .param("response_type", "code")
@@ -49,16 +66,20 @@ public class TokenTest {
                 .with(httpBasic(USERNAME, PASSWORD))
                 .with(csrf()))
                 .andExpect(redirectedUrlPattern(REDIRECT_URI + "?code=*"))
-                .andDo(print())
                 .andReturn();
 
         String redirectedUrl = result.getResponse().getRedirectedUrl();
         assertNotNull(redirectedUrl);
         String code = redirectedUrl.split("code=")[1];
         assertNotNull(code);
+        return code;
+    }
 
-        // 通过code获取token
-        MvcResult result1 = mockMvc.perform(post("/oauth/token")
+    /**
+     * 通过code获取token
+     */
+    private Map getToken(String code) throws Exception {
+        MvcResult result = mockMvc.perform(post("/oauth/token")
                 .with(httpBasic(CLIENT, SECRET))
                 .param("grant_type", "authorization_code")
                 .param("redirect_uri", REDIRECT_URI)
@@ -69,15 +90,17 @@ public class TokenTest {
                 .andExpect(jsonPath("$.refresh_token").isNotEmpty())
                 .andExpect(jsonPath("$.expires_in").isNotEmpty())
                 .andExpect(jsonPath("$.scope").isNotEmpty())
-                .andDo(print())
                 .andReturn();
 
-        String body = result1.getResponse().getContentAsString();
+        String body = result.getResponse().getContentAsString();
         ObjectMapper om = new ObjectMapper();
-        Map map = om.readValue(body, HashMap.class);
-        String token = (String) map.get("access_token");
+        return om.readValue(body, HashMap.class);
+    }
 
-        // 校验token是否正确
+    /**
+     * 校验token是否正确
+     */
+    private void checkToken(String token) throws Exception {
         mockMvc.perform(get("/oauth/check_token")
                 .with(httpBasic(CLIENT, SECRET))
                 .param("token", token))
@@ -88,8 +111,27 @@ public class TokenTest {
                 .andExpect(jsonPath("$.authorities").isNotEmpty())
                 .andExpect(jsonPath("$.client_id").isNotEmpty())
                 .andExpect(jsonPath("$.scope").isNotEmpty())
-                .andDo(print())
         ;
+    }
+
+    /**
+     * 刷新token
+     */
+    private Map refreshToken(String refreshToken) throws Exception {
+        MvcResult result = mockMvc.perform(post("/oauth/token")
+                .with(httpBasic(CLIENT, SECRET))
+                .param("grant_type", "refresh_token")
+                .param("refresh_token", refreshToken))
+                .andExpect(jsonPath("$").isNotEmpty())
+                .andExpect(jsonPath("$.access_token").isNotEmpty())
+                .andExpect(jsonPath("$.token_type").isNotEmpty())
+                .andExpect(jsonPath("$.refresh_token").isNotEmpty())
+                .andExpect(jsonPath("$.expires_in").isNotEmpty())
+                .andExpect(jsonPath("$.scope").isNotEmpty())
+                .andReturn();
+        String body = result.getResponse().getContentAsString();
+        ObjectMapper om = new ObjectMapper();
+        return om.readValue(body, HashMap.class);
     }
 
 
