@@ -29,5 +29,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .password(encoder.encode("password"))
                 .roles("USER")
         ;
+
+        auth.inMemoryAuthentication()
+                .withUser("vip")
+                .password(encoder.encode("password"))
+                .roles("VIP")
+        ;
+
+        auth.inMemoryAuthentication()
+                .withUser("admin")
+                .password(encoder.encode("password"))
+                .roles("USER", "VIP")
+        ;
     }
 }
