@@ -14,7 +14,7 @@
 http://localhost:12222/oauth/authorize?response_type=code&client_id=client&redirect_uri=http%3A%2F%2Fwww.baidu.com
 ```
 
-登录成功后返回URL:
+登录成功后跳转到URL:
 
 ```
 https://www.baidu.com/?code=annqpj
